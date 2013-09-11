@@ -45,6 +45,10 @@
 
 
 + (BOOL)unzipFileAtPath:(NSString *)path toDestination:(NSString *)destination overwrite:(BOOL)overwrite password:(NSString *)password error:(NSError **)error delegate:(id<SSZipArchiveDelegate>)delegate {
+    return [self unzipFileAtPath:path toDestination:destination overwrite:overwrite password:password error:error delegate:delegate didUnzipBlock:nil];
+}
+
++ (BOOL)unzipFileAtPath:(NSString *)path toDestination:(NSString *)destination overwrite:(BOOL)overwrite password:(NSString *)password error:(NSError **)error delegate:(id<SSZipArchiveDelegate>)delegate didUnzipBlock:(void (^)(NSString *unzippedPath))unzippedBlock{
 	// Begin opening
 	zipFile zip = unzOpen((const char*)[path UTF8String]);	
 	if (zip == NULL) {
@@ -289,6 +293,10 @@
 	if (success && [delegate respondsToSelector:@selector(zipArchiveDidUnzipArchiveAtPath:zipInfo:unzippedPath:)]) {
 		[delegate zipArchiveDidUnzipArchiveAtPath:path zipInfo:globalInfo unzippedPath:destination];
 	}
+    
+    if (unzippedBlock != nil) {
+        unzippedBlock(destination);
+    }
 	
 	return success;
 }
